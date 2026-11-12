@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="kk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Өрт сөндіру құралдары · 3D зертхана</title>
+<meta name="description" content="Өрт сөндіру құралдарының 14 интерактивті 3D моделі: бөлшектеу, қима, жұмыс принципінің анимациясы және тест.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Unbounded:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23ff5a1f'/%3E%3Cpath d='M16 5c1 5 6 7 6 13a6 6 0 0 1-12 0c0-3 2-5 3-6 0 2 1 3 2 3 0-4-1-7 1-10z' fill='%23fff'/%3E%3C/svg%3E">
+<style>:root{
+  --bg:#0a0c0f;--bg2:#0f1216;--surface:#13171c;--surface2:#191e25;--surface3:#212731;--line:#252c36;--line2:#333c49;
+  --text:#eef1f5;--muted:#9aa4b0;--dim:#6c7684;
+  --fire:#ff5a1f;--fire2:#ff8a3d;--amber:#ffb627;--ok:#34c98a;--bad:#ff4d5e;--blue:#5aa9ff;
+  --r:16px;--font:"Inter",system-ui,"Segoe UI",Roboto,Arial,sans-serif;--display:"Unbounded","Inter",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 var(--font);-webkit-font-smoothing:antialiased}
+a{color:inherit}
+button,select,input{font:inherit;color:inherit}
+::selection{background:var(--fire);color:#fff}
+
+/* ---------- жоғарғы жолақ ---------- */
+.topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:16px;height:60px;padding:0 20px;
+  background:rgba(10,12,15,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:11px;text-decoration:none;min-width:0}
+.brand-mark{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none;
+  background:radial-gradient(circle at 30% 25%,#ffb36b,var(--fire) 55%,#b8270a);box-shadow:0 6px 18px -6px rgba(255,90,31,.7)}
+.brand-mark svg{width:20px;height:20px}
+.brand-text{display:flex;flex-direction:column;line-height:1.15;min-width:0}
+.brand-text b{font:700 13px/1.2 var(--display);letter-spacing:.04em}
+.brand-text small{color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pager{margin-left:auto;display:flex;align-items:center;gap:6px}
+.pager a,.pager span{display:inline-flex;align-items:center;justify-content:center;height:36px;border-radius:10px;text-decoration:none}
+.pager .arrow{width:36px;border:1px solid var(--line2);background:var(--surface)}
+.pager .arrow:hover{border-color:var(--fire);color:var(--fire2)}
+.pager .arrow[aria-disabled="true"]{opacity:.35;pointer-events:none}
+.pager .count{padding:0 8px;color:var(--muted);font-variant-numeric:tabular-nums;font-size:13px}
+.pager .all{padding:0 14px;margin-left:6px;background:var(--fire);color:#fff;font-weight:600;font-size:13px}
+.pager .all:hover{background:#ff6d36}
+
+/* ---------- макет ---------- */
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:16px;padding:16px 20px 8px;max-width:1720px;margin:0 auto}
+.viewer{min-width:0;display:flex;flex-direction:column;gap:10px}
+#stage{position:relative;height:calc(100vh - 60px - 32px - 74px);min-height:460px;border-radius:var(--r);overflow:hidden;border:1px solid var(--line);
+  background:radial-gradient(120% 90% at 50% 38%,#2d333c 0%,#1a1e24 45%,#0d0f13 100%);isolation:isolate}
+#stage::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(60% 50% at 50% 100%,rgba(255,90,31,.07),transparent 70%);z-index:0}
+#stage canvas{position:absolute;inset:0;display:block;width:100%;height:100%;touch-action:none;cursor:grab;z-index:1}
+#stage canvas:active{cursor:grabbing}
+#stage.hovering canvas{cursor:pointer}
+.ov{position:absolute;z-index:5}
+.ov-title{left:20px;top:18px;max-width:min(560px,70%);pointer-events:none}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--amber);background:rgba(255,182,39,.1);border:1px solid rgba(255,182,39,.28)}
+.chip i{width:6px;height:6px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px var(--amber)}
+.ov-title h1{font:600 clamp(20px,2.3vw,30px)/1.15 var(--display);margin:10px 0 6px;letter-spacing:-.01em;text-shadow:0 2px 18px rgba(0,0,0,.6)}
+.ov-title p{margin:0;color:#c3cbd4;font-size:14px;text-shadow:0 1px 10px rgba(0,0,0,.8)}
+.ov-meta{right:16px;top:16px;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.views{display:flex;gap:2px;padding:3px;border-radius:12px;background:rgba(14,17,21,.72);border:1px solid var(--line);backdrop-filter:blur(10px)}
+.views button{border:0;background:none;padding:6px 10px;border-radius:9px;font-size:12.5px;color:var(--muted);cursor:pointer}
+.views button:hover{color:var(--text);background:var(--surface3)}
+.size{font-size:12px;color:var(--muted);padding:5px 10px;border-radius:9px;background:rgba(14,17,21,.6);border:1px solid var(--line)}
+#readout{display:none;max-width:300px;padding:10px 12px;border-radius:12px;background:rgba(14,17,21,.82);border:1px solid rgba(255,90,31,.4);font-size:13px;
+  font-variant-numeric:tabular-nums;white-space:pre-line;backdrop-filter:blur(10px);box-shadow:0 10px 30px -10px rgba(0,0,0,.6)}
+#readout.on{display:block}
+.hint{left:20px;bottom:84px;font-size:12px;color:var(--dim);pointer-events:none}
+#caption{left:50%;bottom:84px;transform:translateX(-50%);width:min(680px,calc(100% - 40px));padding:12px 16px;border-radius:14px;display:none;
+  background:rgba(14,17,21,.86);border:1px solid var(--line2);backdrop-filter:blur(12px);box-shadow:0 12px 40px -12px rgba(0,0,0,.7)}
+#caption.on{display:block;animation:rise .35s ease}
+#caption b{display:block;font:600 14px/1.3 var(--display);color:var(--fire2);margin-bottom:4px}
+#caption span{font-size:14px;color:#d6dce3}
+@keyframes rise{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
+
+/* ---------- құралдар тақтасы ---------- */
+.toolbar{left:50%;bottom:16px;transform:translateX(-50%);display:flex;align-items:stretch;gap:2px;padding:5px;border-radius:16px;max-width:calc(100% - 24px);overflow-x:auto;scrollbar-width:none;
+  background:rgba(14,17,21,.8);border:1px solid var(--line2);backdrop-filter:blur(14px);box-shadow:0 14px 40px -14px rgba(0,0,0,.8)}
+.toolbar::-webkit-scrollbar{display:none}
+.tb{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:62px;padding:7px 8px 6px;border:0;border-radius:12px;background:none;cursor:pointer;color:var(--muted);flex:none}
+.tb svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tb span{font-size:10.5px;line-height:1;white-space:nowrap}
+.tb:hover{background:var(--surface3);color:var(--text)}
+.tb[aria-pressed="true"]{color:#fff;background:linear-gradient(180deg,rgba(255,90,31,.28),rgba(255,90,31,.12));box-shadow:inset 0 0 0 1px rgba(255,90,31,.5)}
+.tb[hidden]{display:none}
+.sep{width:1px;margin:6px 4px;background:var(--line2);flex:none}
+.explode-pop{display:none;align-items:center;gap:8px;padding:0 10px;flex:none}
+.explode-pop.on{display:flex}
+.explode-pop input{width:110px}
+
+/* ---------- белгілер ---------- */
+#labels{position:absolute;inset:0;z-index:4;pointer-events:none;overflow:hidden}
+.pin{position:absolute;left:0;top:0;display:flex;align-items:center;gap:7px;padding:0;border:0;background:none;cursor:pointer;pointer-events:auto;
+  transform:translate(-11px,-11px);transition:opacity .2s;white-space:nowrap}
+.pin b{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;color:#fff;flex:none;
+  background:rgba(255,90,31,.92);box-shadow:0 0 0 3px rgba(255,90,31,.25),0 4px 12px rgba(0,0,0,.5)}
+.pin span{display:none;padding:4px 9px;border-radius:8px;font-size:12px;background:rgba(14,17,21,.88);border:1px solid var(--line2);color:var(--text)}
+.pin.named span{display:block}
+.pin.hidden{opacity:.18}
+.pin.sel b{background:#fff;color:var(--fire);box-shadow:0 0 0 4px rgba(255,255,255,.3),0 0 22px rgba(255,90,31,.9)}
+.pin:hover b{transform:scale(1.12)}
+#tooltip{position:absolute;z-index:6;display:none;pointer-events:none;padding:5px 10px;border-radius:8px;font-size:12.5px;background:rgba(14,17,21,.92);border:1px solid var(--line2);transform:translate(14px,14px)}
+
+/* ---------- жүктелу ---------- */
+#loader{position:absolute;inset:0;z-index:20;display:grid;place-items:center;background:radial-gradient(circle,#1b2027,#0c0e11);transition:opacity .6s}
+#loader.done{opacity:0;pointer-events:none}
+.spin{width:54px;height:54px;border-radius:50%;border:3px solid rgba(255,255,255,.08);border-top-color:var(--fire);animation:sp 1s linear infinite;margin:0 auto 14px}
+@keyframes sp{to{transform:rotate(360deg)}}
+#loader p{color:var(--muted);text-align:center;margin:0;font-size:13px}
+
+/* ---------- демонстрация жолағы ---------- */
+.demobar{display:flex;align-items:center;gap:12px;height:64px;padding:0 14px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line)}
+.play{display:flex;align-items:center;gap:9px;height:42px;padding:0 16px 0 12px;border-radius:12px;border:0;cursor:pointer;font-weight:600;font-size:14px;color:#fff;flex:none;
+  background:linear-gradient(180deg,#ff6a30,#e9480f);box-shadow:0 8px 20px -8px rgba(255,90,31,.8)}
+.play:hover{filter:brightness(1.08)}
+.play svg{width:18px;height:18px;fill:#fff}
+.iconbtn{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;border:1px solid var(--line2);background:var(--surface2);cursor:pointer;flex:none;color:var(--muted)}
+.iconbtn:hover{color:var(--text);border-color:var(--dim)}
+.iconbtn svg{width:16px;height:16px;fill:currentColor}
+.track{position:relative;flex:1;min-width:80px;height:42px;display:flex;align-items:center}
+.ticks{position:absolute;left:0;right:0;top:50%;height:0;pointer-events:none}
+.ticks i{position:absolute;top:-9px;width:2px;height:18px;border-radius:2px;background:var(--line2);transform:translateX(-1px)}
+.ticks i.done{background:var(--fire)}
+.time{font-variant-numeric:tabular-nums;color:var(--muted);font-size:12.5px;min-width:76px;text-align:right;flex:none}
+select{background:var(--surface2);border:1px solid var(--line2);border-radius:10px;padding:7px 8px;font-size:13px;cursor:pointer}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:4px;background:linear-gradient(90deg,var(--fire) var(--p,0%),var(--line2) var(--p,0%));outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid var(--fire);box-shadow:0 2px 8px rgba(0,0,0,.5)}
+input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:#fff;border:3px solid var(--fire)}
+
+/* ---------- бүйір панель ---------- */
+.panel{display:flex;flex-direction:column;min-width:0;height:calc(100vh - 60px - 24px);position:sticky;top:76px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line);overflow:hidden}
+.tabs{display:flex;gap:2px;padding:6px;border-bottom:1px solid var(--line);background:var(--bg2);overflow-x:auto;scrollbar-width:none;flex:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:1 0 auto;border:0;background:none;padding:9px 11px;border-radius:10px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tab:hover{color:var(--text);background:var(--surface2)}
+.tab[aria-selected="true"]{color:#fff;background:var(--surface3);box-shadow:inset 0 -2px 0 var(--fire)}
+.pane{display:none;padding:16px;overflow-y:auto;flex:1;scrollbar-width:thin;scrollbar-color:var(--line2) transparent}
+.pane.on{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.pane h2{font:600 15px/1.3 var(--display);margin:4px 0 12px}
+.pane h3{font:600 13px/1.3 var(--font);text-transform:uppercase;letter-spacing:.08em;color:var(--dim);margin:20px 0 10px}
+.pane p{margin:0 0 12px;color:#c9d0d8}
+.lead{font-size:14.5px}
+
+.plist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.plist li{border:1px solid var(--line);border-radius:12px;background:var(--surface2);transition:border-color .2s,background .2s}
+.plist button{all:unset;box-sizing:border-box;display:flex;gap:11px;align-items:flex-start;width:100%;padding:11px 12px;cursor:pointer}
+.plist .n{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:11.5px;font-weight:700;flex:none;background:var(--surface3);color:var(--fire2);margin-top:1px}
+.plist .t{display:block;font-weight:600;font-size:14px}
+.plist .d{display:none;margin-top:5px;font-size:13.5px;color:#bcc5ce;line-height:1.5}
+.plist li:hover{border-color:var(--line2)}
+.plist li.sel{border-color:rgba(255,90,31,.55);background:linear-gradient(180deg,rgba(255,90,31,.1),rgba(255,90,31,.03))}
+.plist li.sel .n{background:var(--fire);color:#fff}
+.plist li.sel .d{display:block}
+
+.params{display:flex;flex-direction:column;gap:14px;padding:14px;border-radius:12px;background:var(--surface2);border:1px solid var(--line);margin-bottom:16px}
+.params label{display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--muted)}
+.params label span{display:flex;justify-content:space-between}
+.params label output{color:var(--text);font-weight:600;font-variant-numeric:tabular-nums}
+.steps{list-style:none;margin:0;padding:0;counter-reset:s;position:relative}
+.steps li{position:relative;padding:0 0 16px 38px;cursor:pointer;counter-increment:s}
+.steps li::before{content:counter(s);position:absolute;left:0;top:0;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;
+  background:var(--surface3);color:var(--muted);border:1px solid var(--line2);z-index:1}
+.steps li::after{content:"";position:absolute;left:12.5px;top:26px;bottom:0;width:1px;background:var(--line2)}
+.steps li:last-child::after{display:none}
+.steps b{display:block;font-size:14px;margin:2px 0 3px}
+.steps span{display:block;font-size:13.5px;color:#aab3bd}
+.steps li.done::before{background:rgba(255,90,31,.2);color:var(--fire2);border-color:rgba(255,90,31,.5)}
+.steps li.cur::before{background:var(--fire);color:#fff;border-color:var(--fire);box-shadow:0 0 0 4px rgba(255,90,31,.2)}
+.steps li.cur b{color:var(--fire2)}
+.steps li.cur span{color:#dfe5ea}
+
+table.spec{width:100%;border-collapse:collapse;font-size:13.5px}
+.spec th,.spec td{text-align:left;padding:9px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.spec th{color:var(--muted);font-weight:500;width:52%;padding-right:12px}
+.spec td{font-weight:600;font-variant-numeric:tabular-nums}
+.note{font-size:12.5px;color:var(--dim);margin-top:12px}
+.rules{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.rules li{display:flex;gap:11px;padding:12px;border-radius:12px;background:var(--surface2);border:1px solid var(--line);font-size:13.5px;color:#d0d6dd}
+.rules li i{flex:none;width:22px;height:22px;border-radius:7px;display:grid;place-items:center;font-style:normal;font-weight:800;font-size:12px}
+.rules li.do i{background:rgba(52,201,138,.15);color:var(--ok)}
+.rules li.dont i{background:rgba(255,77,94,.15);color:var(--bad)}
+.rules li.warn i{background:rgba(255,182,39,.15);color:var(--amber)}
+
+.quiz{display:flex;flex-direction:column;gap:14px}
+.q{padding:14px;border-radius:12px;background:var(--surface2);border:1px solid var(--line)}
+.q p{font-weight:600;color:var(--text);margin:0 0 10px;font-size:14px}
+.q .opts{display:flex;flex-direction:column;gap:6px}
+.q button{text-align:left;padding:9px 12px;border-radius:10px;border:1px solid var(--line2);background:var(--surface);cursor:pointer;font-size:13.5px}
+.q button:hover:not(:disabled){border-color:var(--dim)}
+.q button.ok{border-color:var(--ok);background:rgba(52,201,138,.12)}
+.q button.bad{border-color:var(--bad);background:rgba(255,77,94,.1)}
+.q button:disabled{cursor:default}
+.q .why{display:none;margin-top:10px;font-size:13px;color:#b9c2cb}
+.q.answered .why{display:block}
+.score{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px;border-radius:12px;background:linear-gradient(135deg,rgba(255,90,31,.16),rgba(255,182,39,.08));border:1px solid rgba(255,90,31,.35)}
+.score b{font:600 18px var(--display)}
+.btn{padding:9px 14px;border-radius:10px;border:1px solid var(--line2);background:var(--surface3);cursor:pointer;font-size:13px;font-weight:600}
+.btn:hover{border-color:var(--fire)}
+
+footer.foot{max-width:1720px;margin:0 auto;padding:6px 20px 22px;display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--dim);font-size:12.5px}
+footer.foot kbd{font:600 11px var(--font);padding:2px 6px;border-radius:5px;border:1px solid var(--line2);background:var(--surface);color:var(--muted)}
+
+/* ---------- бейімделу ---------- */
+@media (max-width:1180px){
+  .layout{grid-template-columns:1fr}
+  .panel{position:static;height:auto;max-height:none}
+  .pane{max-height:none}
+  #stage{height:min(72vh,720px)}
+}
+@media (max-width:640px){
+  .topbar{padding:0 12px;gap:10px}
+  .brand-text small{display:none}
+  .pager .all{display:none}
+  .layout{padding:10px 10px 6px;gap:10px}
+  #stage{height:68vh;min-height:400px}
+  .ov-title{left:14px;top:14px;max-width:calc(100% - 28px)}
+  .ov-title p{display:none}
+  .ov-meta{top:auto;bottom:84px;right:10px}
+  .views button{padding:5px 7px}
+  .size{display:none}
+  .hint{display:none}
+  #caption{bottom:84px;width:calc(100% - 20px)}
+  .tb{min-width:52px;padding:7px 4px 6px}
+  .demobar{flex-wrap:wrap;height:auto;padding:10px}
+  .track{order:5;flex-basis:100%}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+body.home{background:var(--bg)}
+.hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line);background:radial-gradient(90% 120% at 80% 0%,rgba(255,90,31,.2),transparent 55%),radial-gradient(70% 100% at 0% 100%,rgba(255,182,39,.08),transparent 60%),var(--bg2)}
+#embers{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.hero-in{position:relative;max-width:1180px;margin:0 auto;padding:64px 24px 54px}
+.hero h1{font:700 clamp(30px,5.2vw,58px)/1.06 var(--display);letter-spacing:-.02em;margin:18px 0 16px;max-width:900px}
+.hero h1 em{font-style:normal;background:linear-gradient(100deg,#ffb627,#ff5a1f 60%,#ff3d4f);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{max-width:720px;color:#c3cbd4;font-size:16.5px;margin:0 0 30px}
+.stats{display:flex;flex-wrap:wrap;gap:12px}
+.stats div{min-width:140px;padding:14px 18px;border-radius:14px;background:rgba(19,23,28,.7);border:1px solid var(--line2);backdrop-filter:blur(8px)}
+.stats b{display:block;font:700 26px var(--display);color:var(--fire2)}
+.stats span{font-size:12.5px;color:var(--muted)}
+.catalog{max-width:1180px;margin:0 auto;padding:30px 24px 10px}
+.tools{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin-bottom:22px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.cchip{border:1px solid var(--line2);background:var(--surface);border-radius:99px;padding:8px 15px;font-size:13.5px;color:var(--muted);cursor:pointer}
+.cchip:hover{color:var(--text);border-color:var(--dim)}
+.cchip[aria-selected="true"]{background:var(--fire);border-color:var(--fire);color:#fff;font-weight:600}
+.search{position:relative;flex:1 1 240px;max-width:340px}
+.search svg{position:absolute;left:13px;top:50%;width:17px;height:17px;transform:translateY(-50%);stroke:var(--dim);fill:none;stroke-width:2;stroke-linecap:round}
+.search input{width:100%;height:42px;padding:0 14px 0 38px;border-radius:12px;border:1px solid var(--line2);background:var(--surface);outline:none}
+.search input:focus{border-color:var(--fire)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
+.card{position:relative;display:flex;flex-direction:column;gap:14px;padding:20px;border-radius:18px;text-decoration:none;background:linear-gradient(180deg,var(--surface2),var(--surface));border:1px solid var(--line);overflow:hidden;transition:transform .25s,border-color .25s,box-shadow .25s;min-height:230px}
+.card[hidden]{display:none}
+.card::before{content:"";position:absolute;inset:auto -30% -60% -30%;height:70%;background:radial-gradient(closest-side,rgba(255,90,31,.25),transparent);opacity:0;transition:opacity .3s}
+.card:hover{transform:translateY(-4px);border-color:rgba(255,90,31,.6);box-shadow:0 18px 40px -20px rgba(255,90,31,.5)}
+.card:hover::before{opacity:1}
+.card:focus-visible{outline:2px solid var(--fire);outline-offset:2px}
+.ico{width:64px;height:64px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(145deg,rgba(255,90,31,.18),rgba(255,182,39,.06));border:1px solid rgba(255,90,31,.3)}
+.ico svg{width:36px;height:36px;stroke:var(--fire2);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.num{position:absolute;right:18px;top:16px;font:600 13px var(--display);color:var(--dim)}
+.card small{font-size:11.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--amber);font-weight:600}
+.card h2{font:600 17px/1.25 var(--display);margin:2px 0 0}
+.card p{margin:0;color:var(--muted);font-size:13.5px;line-height:1.5}
+.card .go{margin-top:auto;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--fire2)}
+.card .go::after{content:"→";transition:transform .25s}
+.card:hover .go::after{transform:translateX(5px)}
+.empty{text-align:center;color:var(--muted);padding:40px 0}
+@media(max-width:640px){.hero-in{padding:44px 16px 36px}.catalog{padding:22px 14px 6px}.stats div{min-width:calc(50% - 6px);flex:1}}
+</style>
+</head>
+<body class="home">
+<header class="topbar">
+  <a class="brand" href="index.html">
+    <span class="brand-mark"><svg viewBox="0 0 24 24"><path d="M12 2c.8 3.6 4.6 5.4 4.6 10a4.6 4.6 0 0 1-9.2 0c0-2.3 1.4-3.9 2.3-4.6 0 1.5.8 2.4 1.5 2.4 0-3-1-5.4.8-7.8z" fill="#fff"/></svg></span>
+    <span class="brand-text"><b>ӨРТ · 3D ЗЕРТХАНА</b><small>Өрт сөндіру құралдарының интерактивті модельдері</small></span>
+  </a>
+  <nav class="pager"><a class="all" href="01-kiim.html">Бастау →</a></nav>
+</header>
+
+<section class="hero">
+  <canvas id="embers" aria-hidden="true"></canvas>
+  <div class="hero-in">
+    <span class="chip"><i></i>Интерактивті оқу материалы</span>
+    <h1>Өрт сөндіру құралдары <em>3D форматта</em></h1>
+    <p>14 құралдың нақты өлшемдегі модельдері: айналдырыңыз, бөлшектеп қараңыз, қимасын ашыңыз және жұмыс принципін анимациядан көріңіз. Әр бетте — сипаттама, қауіпсіздік ережелері және өз білімін тексеруге арналған тест.</p>
+    <div class="stats">
+      <div><b>14</b><span>3D модель</span></div>
+      <div><b>71</b><span>таңдалатын бөлшек</span></div>
+      <div><b>14</b><span>жұмыс анимациясы</span></div>
+      <div><b>43</b><span>тест сұрағы</span></div>
+    </div>
+  </div>
+</section>
+
+<main class="catalog">
+  <div class="tools">
+    <div class="chips" id="chips" role="tablist"></div>
+    <label class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input id="q" type="search" placeholder="Құралды іздеу…" autocomplete="off"></label>
+  </div>
+  <div class="grid" id="grid">
+    <a class="card" href="01-kiim.html" data-cat="Жеке қорғаныс құралдары"><span class="num">01</span><span class="ico"><svg viewBox="0 0 24 24"><path d="M8 3 4 6v6l3-1v10h10V11l3 1V6l-4-3-2 2h-4z"/><path d="M7 15h10M7 18h10"/></svg></span>
+      <div><small>Жеке қорғаныс құралдары</small><h2>Өрт сөндірушінің жауынгерлік киімі</h2></div><p>Көп қабатты отқа төзімді киім: дулыға мен бетқалқан, күртеше, белдік, шалбар, етік және қолғап.</p><span class="go">3D-де ашу</span></a>
+    <a class="card" href="02-respirator.html" data-cat="Тыныс алу мүшелерін қорғау"><span class="num">02</span><span class="ico"><svg viewBox="0 0 24 24"><path d="M4 11c2-3 5-3 8-1 3-2 6-2 8 1v3c-1 3-4 5-8 5s-7-2-8-5z"/><circle cx="6" cy="14" r="2"/><circle cx="18" cy="14" r="2"/><path d="M11 15h2"/></svg></span>
+      <div><small>Тыныс алу мүшелерін қорғау</small><h2>Респиратор</h2></div><p>Екі сүзгілі жартылай бетперде: силикон бетперде, ауыстырмалы картридждер, клапандар және бас баулары.</p><span class="go">3D-де ашу</span></a>
+    <a class="card" href="03-scba.html" data-cat="Тыныс алу мүшелерін қорғау"><span class="num">03</span><span class="ico"><svg viewBox="0 0 24 24"><rect x="8" y="5" width="8" height="15" rx="3"/><path d="M10 5V3h4v2M6 8v8M18 8v8"/><circle cx="12" cy="11" r="1.6"/></svg></span>
+      <div><small>Тыныс алу мүшелерін қорғау</small><h2>Оқшаулағыш тыныс алу аппараты</h2></div><p>Қысылған ауалы аппарат (ДАСВ): композит баллон, арқалық, қысым реттегіші, манометр, шланг және толық бет маскасы.</p><span class="go">3D-де ашу</span></a>
+    <a class="card" href="04-gasmask.html" data-cat="Тыныс алу мүшелерін қорғау"><span class="num">04</span><span class="ico"><svg viewBox="0 0 24 24"><path d="M5 9c0-3 3-5 7-5s7 2 7 5v5c0 3-3 6-7 6s-7-3-7-6z"/><circle cx="9" cy="10" r="1.7"/><circle cx="15" cy="10" r="1.7"/><rect x="9" y="15" width="6" height="5" rx="1.5"/></svg></span>
+      <div><small>Тыныс алу мүшелерін қорғау</small><h2>Сүзгіш газқағар</h2></div><p>Толық бет сүзгіш газқағар: резеңке бетперде, панорамалық әйнек, сүзгі қорабы, клапандар және бас баулары.</p><span class="go">3D-де ашу</span></a>
+    <a class="card" href="05-powder.html" data-cat="Өрт сөндіргіштер"><span class="num">05</span><span class="ico"><svg viewBox="0 0 24 24"><rect x="7" y="9" width="9" height="12" rx="3"/><path d="M10 9V6h4l3 2M17 8l3 3v5"/><path d="M9 14h5"/></svg></span>
+      <div><small>Өрт сөндіргіштер</small><h2>Ұнтақты өрт сөндіргіш</h2></div><p>ОП-4(з) типті айдалмалы ұнтақты өрт сөндіргіш: корпус, заряд, сифон, іске қосу торабы, манометр және шланг.</p><span class="go">3D-де ашу</span></a>
+    <a class="card" href="06-co2.html" data-cat="Өрт сөндіргіштер"><span class="num">06</span><span class="ico"><svg viewBox="0 0 24 24"><rect x="7" y="9" width="8" height="12" rx="3"/><path d="M10 9V6h4M14 6l4 1M17 8l4 4-2 3"/></svg></span>
+      <div><small>Өрт сөндіргіштер</small><h2>Көмірқышқылды өрт сөндіргіш</h2></div><p>ОУ-5 типті көмірқышқылды өрт сөндіргіш: жуан қабырғалы баллон, сифон, құлыпты вентиль және қар түзетін раструб.</p><span class="go">3D-де ашу</span></a>
+    <a class="card" href="07-foam.html" data-cat="Өрт сөндіргіштер"><span class="num">07</span><span class="ico"><svg viewBox="0 0 24 24"><rect x="7" y="9" width="9" height="12" rx="3"/><path d="M10 9V6h4l3 2"/><circle cx="19" cy="14" r="1.4"/><circle cx="20" cy="18" r="1"/><circle cx="17.5" cy="18.5" r=".8"/></svg></span>
+      <div><small>Өрт сөндіргіштер</small><h2>Көбікті өрт сөндіргіш</h2></div><p>ОВП-10 типті әуе-көбікті өрт сөндіргіш: көбік түзетін ерітінді, сифон, манометр және әуе-көбікті саптама.</p><span class="go">3D-де ашу</span></a>
+    <a class="card" href="08-hose.html" data-cat="Су беру жабдықтары"><span class="num">08</span><span class="ico"><svg viewBox="0 0 24 24"><path d="M12 12a1.5 1.5 0 1 0 0-.1M12 9c3 0 4 3 3 5s-5 3-7 1-2-7 2-9 9 0 10 5 0 8-3 9"/><path d="M19 20h2"/></svg></span>
+      <div><small>Су беру жабдықтары</small><h2>Өрт сөндіру жеңі</h2></div><p>Қысымды өрт жеңі: тоқыма сыртқы қабат, ішкі резеңке қабат және Гебхардт жүйесінің екі жалғастырғыш басы.</p><span class="go">3D-де ашу</span></a>
+    <a class="card" href="09-nozzle.html" data-cat="Су беру жабдықтары"><span class="num">09</span><span class="ico"><svg viewBox="0 0 24 24"><path d="M3 11h6l2-2h6l3 3v2h-3l-2 2H9v-2H3z"/><path d="M10 15v5h3v-5"/></svg></span>
+      <div><small>Су беру жабдықтары</small><h2>Өрт сөндіру оқпаны</h2></div><p>Тапаншалы тұтқалы шар кранды оқпан: жалғастырғыш бас, корпус, тетік және ағын/тозаң саптамасы.</p><span class="go">3D-де ашу</span></a>
+    <a class="card" href="10-hydrant.html" data-cat="Су беру жабдықтары"><span class="num">10</span><span class="ico"><svg viewBox="0 0 24 24"><path d="M9 4h6M10 4v3M14 4v3"/><path d="M8 7h8v13H8z"/><path d="M4 11h4v4H4zM16 11h4v4h-4z"/><path d="M7 20h10"/></svg></span>
+      <div><small>Су беру жабдықтары</small><h2>Өрт гидранты</h2></div><p>Жерүсті өрт гидранты: шойын корпус, екі шығару бастиегі, штурвал мен шток, ішкі клапан және төменгі иілік.</p><span class="go">3D-де ашу</span></a>
+    <a class="card" href="11-axe.html" data-cat="Бұзу құралдары"><span class="num">11</span><span class="ico"><svg viewBox="0 0 24 24"><path d="M5 20 15 8"/><path d="M13 5c3-1 6 0 7 2-1 3-3 5-6 5l-3-3z"/><path d="M13 5l-4-1"/></svg></span>
+      <div><small>Бұзу құралдары</small><h2>Өрт балтасы</h2></div><p>Пик-тәрізді өрт балтасы: шыны талшықты сап, шыңдалған болат бас, кескіш жүздігі, пик пен сапты бекіту сынасы.</p><span class="go">3D-де ашу</span></a>
+    <a class="card" href="12-crowbar.html" data-cat="Бұзу құралдары"><span class="num">12</span><span class="ico"><svg viewBox="0 0 24 24"><path d="M4 20 16 8c1-1 3-1 4 0M20 8l1 3"/><path d="M3 21l2-1"/></svg></span>
+      <div><small>Бұзу құралдары</small><h2>Сүймен (лом)</h2></div><p>Өрт сүйменi: алты қырлы болат білік, қашау тәрізді жалпақ ұш, шеге суыратын иілген тұмсық.</p><span class="go">3D-де ашу</span></a>
+    <a class="card" href="13-hook.html" data-cat="Бұзу құралдары"><span class="num">13</span><span class="ico"><svg viewBox="0 0 24 24"><path d="M5 20 18 7"/><path d="M18 7c2-1 3 1 2 3s-3 3-5 2"/><path d="M4 21l2-1"/></svg></span>
+      <div><small>Бұзу құралдары</small><h2>Ілмек (өрт ілгегі)</h2></div><p>Ұзын сапты өрт ілмегі: ағаш сап, болат төлке, ұшы өткір тұмсық пен иілген ілгек.</p><span class="go">3D-де ашу</span></a>
+    <a class="card" href="14-blanket.html" data-cat="Алғашқы құралдар"><span class="num">14</span><span class="ico"><svg viewBox="0 0 24 24"><path d="M4 6h16v13H4z"/><path d="M4 6l3 3h10l3-3"/><path d="M12 12c1 2 2 2 2 4a2 2 0 0 1-4 0c0-1 1-1 1-2 0 1 1 1 1 0z"/></svg></span>
+      <div><small>Алғашқы құралдар</small><h2>Өртке қарсы жабын</h2></div><p>Өртке қарсы жабын (киіз): қапшық-контейнер, шыны талшықты мата, тарту белдіктері және бекіткіштер.</p><span class="go">3D-де ашу</span></a>
+  </div>
+  <p class="empty" id="empty" hidden>Ештеңе табылмады. Басқа сөз енгізіп көріңіз.</p>
+</main>
+
+<footer class="foot">
+  <span>Модельдер — оқу мақсатындағы реконструкциялар; өлшемдері мен ішкі құрылымы типтік мәндерге жуық. Нақты құрал үшін өндірушінің паспортын басшылыққа алыңыз.</span>
+  <span>Құрал бетінде: <kbd>←</kbd> <kbd>→</kbd> құралдар арасында жылжу.</span>
+</footer>
+<script>
+(function(){
+  var cards=[].slice.call(document.querySelectorAll('.card')), cats=[], active='Барлығы';
+  cards.forEach(function(c){ var k=c.dataset.cat; if(cats.indexOf(k)<0) cats.push(k); });
+  var chips=document.getElementById('chips');
+  ['Барлығы'].concat(cats).forEach(function(k){
+    var b=document.createElement('button'); b.className='cchip'; b.textContent=k; b.setAttribute('role','tab'); b.setAttribute('aria-selected',k===active);
+    b.onclick=function(){ active=k; [].forEach.call(chips.children,function(x){x.setAttribute('aria-selected',x===b)}); apply(); }; chips.appendChild(b);
+  });
+  var q=document.getElementById('q'), empty=document.getElementById('empty');
+  function apply(){ var t=q.value.trim().toLowerCase(), n=0;
+    cards.forEach(function(c){ var ok=(active==='Барлығы'||c.dataset.cat===active)&&(!t||c.textContent.toLowerCase().indexOf(t)>-1); c.hidden=!ok; if(ok)n++; });
+    empty.hidden=n>0; }
+  q.addEventListener('input',apply);
+  var cv=document.getElementById('embers'), g=cv.getContext('2d'), W,H,P=[],reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  function size(){ W=cv.width=cv.offsetWidth*devicePixelRatio; H=cv.height=cv.offsetHeight*devicePixelRatio; }
+  size(); addEventListener('resize',size);
+  function spawn(){ return {x:Math.random()*W,y:H+10,vx:(Math.random()-.5)*.4,vy:-(.4+Math.random()*1.1)*devicePixelRatio,r:(.6+Math.random()*2)*devicePixelRatio,a:.2+Math.random()*.7,l:1}; }
+  for(var i=0;i<70;i++){var p=spawn();p.y=Math.random()*H;P.push(p);}
+  (function tick(){ g.clearRect(0,0,W,H);
+    P.forEach(function(p,i){ p.x+=p.vx+Math.sin(p.y*.01+i)*.3; p.y+=p.vy; p.l-=.0025; if(p.y<-10||p.l<=0)P[i]=spawn();
+      var gr=g.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*4); gr.addColorStop(0,'rgba(255,170,70,'+p.a*p.l+')'); gr.addColorStop(1,'rgba(255,90,31,0)'); g.fillStyle=gr; g.beginPath(); g.arc(p.x,p.y,p.r*4,0,6.283); g.fill(); });
+    if(!reduce) requestAnimationFrame(tick); })();
+})();
+</script>
+</body>
+</html>
